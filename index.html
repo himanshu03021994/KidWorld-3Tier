@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kids World - Premium PWA</title>
     
+    <meta name="description" content="Kids World - Ad-free Hindi & English Learning App for Kids by Himanshu">
+    <meta name="keywords" content="Alphabet learning, Hindi Varnamala, Kids Game, Educational App, Kids World Patna">
+    <meta name="author" content="Himanshu - DevOps Professional">
+
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#42A5F5">
     <script>
@@ -91,6 +95,15 @@
 
 <script>
     let c = 0, lives = 3, mode = '', list = [], idx = 0;
+    
+    // --- UPDATED: Admin Tracking Function ---
+    function sendToAdmin(char, isCorrect) {
+        const status = isCorrect ? 'correct' : 'wrong';
+        // Go Backend API call
+        fetch(`http://localhost:8080/track?char=${char}&status=${status}`)
+        .catch(err => console.log("Admin Dashboard is Offline"));
+    }
+
     const dict = {
         'A':['A for Apple','🍎'],'B':['B for Ball','⚽'],'C':['C for Cat','🐱'],'D':['D for Dog','🐶'],'E':['E for Elephant','🐘'],'F':['F for Fish','🐟'],'G':['G for Grapes','🍇'],'H':['H for Horse','🐎'],'I':['I for Ice-cream','🍦'],'J':['J for Joker','🤡'],'K':['K for Kite','🪁'],'L':['L for Lion','🦁'],'M':['M for Monkey','🐒'],'N':['N for Nest','🪺'],'O':['O for Orange','🍊'],'P':['P for Parrot','🦜'],'Q':['Q for Queen','👸'],'R':['R for Rabbit','🐰'],'S':['S for Sun','☀️'],'T':['T for Tiger','🐯'],'U':['U for Umbrella','☂️'],'V':['V for Van','🚐'],'W':['W for Watch','⌚'],'X':['X for X-mas Tree','🎄'],'Y':['Y for Yacht','⛵'],'Z':['Z for Zebra','🦓'],
         'अ':['अ से अनार','🍎'],'आ':['आ से आम','🥭'],'इ':['इ से इमली','🍬'],'ई':['ई से ईख','🎋'],'उ':['उ से उल्लू','🦉'],'ऊ':['ऊ से ऊन','🧶'],'ऋ':['ऋ से ऋषि','🧘'],'ए':['ए से एड़ी','🦶'],'ऐ':['ऐ से ऐनक','👓'],'ओ':['ओ से ओखली','🥣'],'औ':['औ से औरत','👩'],'अं':['अं से अंगूर','🍇'],'अः':['अः खाली','✨'],
@@ -129,7 +142,9 @@
             b.className = 'choice-btn'; b.innerText = o;
             b.onclick = () => {
                 if(o === target) {
-                    c++; let info = dict[o] || [o, '🌟'];
+                    c++; 
+                    sendToAdmin(o, true); // --- UPDATED: Tracking Success ---
+                    let info = dict[o] || [o, '🌟'];
                     speak(info[0]);
                     document.getElementById('p-emoji').innerText = info[1];
                     document.getElementById('p-msg').innerText = info[0];
@@ -140,7 +155,9 @@
                         idx++; if(idx >= list.length) location.reload(); else load();
                     }, 2000);
                 } else {
-                    lives--; updateUI(); if(lives <= 0) location.reload();
+                    lives--; 
+                    sendToAdmin(target, false); // --- UPDATED: Tracking Error ---
+                    updateUI(); if(lives <= 0) location.reload();
                 }
             };
             document.getElementById('c-grid').appendChild(b);
