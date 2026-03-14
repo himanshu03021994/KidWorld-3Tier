@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kid World - Playing!</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background-color: #E0F7FA;
+            text-align: center;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 90vh;
+        }
+        .flashcard {
+            background-color: white;
+            border: 8px solid #FFD700;
+            border-radius: 30px;
+            width: 300px;
+            padding: 40px;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+        #mainLetter {
+            font-size: 6em;
+            color: #FF6347;
+            margin: 0;
+            line-height: 1;
+        }
+        #subText {
+            font-size: 2em;
+            color: #32CD32;
+            margin-top: 20px;
+        }
+        .controls {
+            display: flex;
+            gap: 20px;
+        }
+        button {
+            background-color: #1E90FF;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            border-radius: 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #0000CD;
+        }
+        button:active { transform: translateY(5px); box-shadow: 0 0 0; }
+        .back-btn { background-color: #FF69B4; box-shadow: 0 5px 0 #C71585; margin-bottom: 20px;}
+    </style>
+</head>
+<body>
+
+    <button class="back-btn" onclick="window.location.href='dashboard.html'">🔙 Back to Menu</button>
+
+    <div class="flashcard">
+        <h1 id="mainLetter">...</h1>
+        <div id="subText">...</div>
+    </div>
+
+    <div class="controls">
+        <button onclick="prevItem()">⬅️ Prev</button>
+        <button onclick="nextItem()">Next ➡️</button>
+    </div>
+
+    <script>
+        // YOUR EXACT DATA STRUCTURE
+        const dict = {
+            'A':['A for Apple','🍎'],'B':['B for Ball','⚽'],'C':['C for Cat','🐱'],'D':['D for Dog','🐶'],'E':['E for Elephant','🐘'],'F':['F for Fish','🐟'],'G':['G for Grapes','🍇'],'H':['H for Horse','🐎'],'I':['I for Ice-cream','🍦'],'J':['J for Joker','🤡'],'K':['K for Kite','🪁'],'L':['L for Lion','🦁'],'M':['M for Monkey','🐒'],'N':['N for Nest','🪺'],'O':['O for Orange','🍊'],'P':['P for Parrot','🦜'],'Q':['Q for Queen','👸'],'R':['R for Rabbit','🐰'],'S':['S for Sun','☀️'],'T':['T for Tiger','🐯'],'U':['U for Umbrella','☂️'],'V':['V for Van','🚐'],'W':['W for Watch','⌚'],'X':['X for X-mas Tree','🎄'],'Y':['Y for Yacht','⛵'],'Z':['Z for Zebra','🦓'],
+            'अ':['अ से अनार','🍎'],'आ':['आ से आम','🥭'],'इ':['इ से इमली','🍬'],'ई':['ई से ईख','🎋'],'उ':['उ से उल्लू','🦉'],'ऊ':['ऊ से ऊन','🧶'],'ऋ':['ऋ से ऋषि','🧘'],'ए':['ए से एड़ी','🦶'],'ऐ':['ऐ से ऐनक','👓'],'ओ':['ओ से ओखली','🥣'],'औ':['औ से औरत','👩'],'अं':['अं से अंगूर','🍇'],'अः':['अः खाली','✨'],
+            'क':['क से कबूतर','🐦'],'ख':['ख से खरगोश','🐰'],'ग':['ग से गमला','🪴'],'घ':['घ से घड़ी','⌚'],'ङ':['ङ खाली','✨'],'च':['च से चम्मच','🥄'],'छ':['छ से छतरी','☂️'],'ज':['ज से जहाज','🚢'],'झ':['झ से झंडा','🇮🇳'],'ञ':['ञ खाली','✨'],'ट':['ट से टमाटर','🍅'],'ठ':['ठ से ठठेरा','⚒️'],'ड':['ड से डमरू','🥁'],'ढ':['ढ से ढक्कन','🥘'],'ण':['ण खाली','✨'],'त':['त से तरबूज','🍉'],'थ':['थ से थरमस','🍶'],'द':['द से दवात','✒️'],'ध':['ध से धनुष','🏹'],'न':['न से नल','🚰'],'प':['प से पतंग','🪁'],'फ':['फ से फल','🍎'],'ब':['ब से बत्तख','🦆'],'भ':['भ से भालू','🐻'],'म':['म से मछली','🐟'],'य':['य से यज्ञ','🔥'],'र':['र से रथ','🏇'],'ल':['ल से लट्टू','🔝'],'व':['व से वक','🦢'],'श':['श से शलजम','🥬'],'ष':['ष से षट्कोण','🔷'],'स':['स से सपेरा','🐍'],'ह':['ह से हाथी','🐘'],'क्ष':['क्ष से क्षत्रिय','⚔️'],'त्र':['त्र से त्रिशूल','🔱'],'ज्ञ':['ज्ञ से ज्ञानी','👨‍🏫']
+        };
+        const data = {
+            abc: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
+            num: "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20".split(","),
+            hv: "अआइईउऊऋएऐओऔअंअः".split(""),
+            hc: "कखगघङचछजझञटठडढणतथदधनपफबभमकयरलवशषसहक्षत्रज्ञ".split("")
+        };
+
+        // GAME LOGIC
+        let mode = localStorage.getItem('gameMode') || 'abc'; 
+        let currentList = data[mode] || data['abc'];
+        let idx = 0;
+
+        function updateScreen() {
+            let currentItem = currentList[idx];
+            document.getElementById('mainLetter').innerText = currentItem;
+
+            // Check if we have dictionary details for it (like Apple 🍎)
+            if (dict[currentItem]) {
+                document.getElementById('subText').innerText = dict[currentItem][0] + " " + dict[currentItem][1];
+            } else {
+                // Fallback for numbers
+                document.getElementById('subText').innerText = "⭐"; 
+            }
+        }
+
+        function nextItem() {
+            if (idx < currentList.length - 1) {
+                idx++;
+                updateScreen();
+            }
+        }
+
+        function prevItem() {
+            if (idx > 0) {
+                idx--;
+                updateScreen();
+            }
+        }
+
+        // Start the game!
+        updateScreen();
+    </script>
+</body>
+</html>

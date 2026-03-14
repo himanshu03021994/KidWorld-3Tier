@@ -1,174 +1,140 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kids World - Premium PWA</title>
-    
-    <meta name="description" content="Kids World - Ad-free Hindi & English Learning App for Kids by Himanshu">
-    <meta name="keywords" content="Alphabet learning, Hindi Varnamala, Kids Game, Educational App, Kids World Patna">
-    <meta name="author" content="Himanshu - DevOps Professional">
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#42A5F5">
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-            .then(() => console.log("Service Worker Registered"))
-            .catch(err => console.log("SW Registration Failed", err));
-        }
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kid World - Welcome!</title>
     <style>
-        :root { --bg: #E3F2FD; --card: #FFFFFF; --blue: #42A5F5; --orange: #FFA726; --pink: #EC407A; --green: #66BB6A; --text: #2C3E50; }
-        body { margin: 0; background: var(--bg); font-family: 'Arial Rounded MT Bold', sans-serif; text-align: center; color: var(--text); overflow-x: hidden; }
-        
-        #menu-screen { display: block; padding: 20px 0; }
-        #game-screen { display: none; padding-top: 80px; }
-
-        .section-header { width: 85%; margin: 20px auto 10px; padding: 12px; border-radius: 20px; font-weight: bold; color: white; font-size: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .head-blue { background: var(--blue); }
-        .head-orange { background: var(--orange); }
-        .head-pink { background: var(--pink); }
-
-        .header-logo { background: var(--card); width: 80%; padding: 15px; border-radius: 30px; margin: 0 auto 10px; border: 4px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; width: 90%; margin: 0 auto 30px; }
-
-        .btn { padding: 20px; border-radius: 25px; border: none; color: white; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.2s; box-shadow: 0 4px 0 rgba(0,0,0,0.1); }
-        .btn-blue { background: #90CAF9; }
-        .btn-orange { background: #FFCC80; }
-        .btn-pink { background: #F48FB1; }
-
-        .hud { display: flex; justify-content: space-between; position: fixed; top: 15px; width: 90%; left: 5%; z-index: 100; }
-        .stat { background: var(--card); padding: 10px 18px; border-radius: 20px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        
-        .target-box { background: var(--card); border-radius: 40px; padding: 25px; margin: 20px auto; width: 75%; border: 6px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.05); min-height: 120px; display: flex; align-items: center; justify-content: center; }
-        .target-char { font-size: 90px; color: var(--blue); font-weight: bold; }
-        
-        .choice-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; }
-        .choice-btn { background: var(--green); color: white; font-size: 40px; padding: 18px 0; border-radius: 25px; border: none; box-shadow: 0 6px 0 #43A047; cursor: pointer; }
-
-        #pop { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--card); padding: 30px; border-radius: 40px; border: 10px solid var(--orange); z-index: 1000; width: 75%; }
-        #home-nav-btn { padding: 10px 15px; background: var(--card); border-radius: 15px; border: none; font-weight: bold; cursor: pointer; }
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background-color: #87CEEB;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: radial-gradient(circle, #fff 10%, transparent 11%), radial-gradient(circle, #fff 10%, transparent 11%);
+            background-size: 60px 60px;
+            background-position: 0 0, 30px 30px;
+        }
+        .login-card {
+            background-color: white;
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            border: 5px solid #FFB6C1;
+        }
+        h1 { color: #FF6347; margin-top: 0; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { color: #32CD32; font-weight: bold; display: block; margin-bottom: 5px;}
+        input, select { 
+            width: 100%; padding: 10px; border: 3px solid #FFD700; 
+            border-radius: 10px; box-sizing: border-box; font-size: 1em;
+        }
+        .play-btn {
+            background-color: #32CD32; color: white; border: none; padding: 15px;
+            font-size: 1.5em; border-radius: 20px; cursor: pointer; width: 100%;
+            font-weight: bold; box-shadow: 0 5px 0 #228B22; margin-top: 10px;
+        }
+        .play-btn:active { transform: translateY(5px); box-shadow: 0 0 0 #228B22; }
+        #resultArea { display: none; margin-top: 20px; padding: 20px; background: #e0f7fa; border-radius: 15px; }
     </style>
 </head>
 <body>
 
-<div id="menu-screen">
-    <div class="header-logo"><h1>KIDS WORLD 🌈</h1></div>
-    
-    <div class="section-header head-blue">ABC ALPHABETS</div>
-    <div class="grid">
-        <button class="btn btn-blue" onclick="start('abc', 0, 13)">A - M</button>
-        <button class="btn btn-blue" onclick="start('abc', 13, 26)">N - Z</button>
+    <div class="login-card">
+        <h1>🎈 Kid World 🎈</h1>
+        
+        <form id="kidForm">
+            <div class="input-group">
+                <label>Kid's Name:</label>
+                <input type="text" id="kidName" required>
+            </div>
+            <div class="input-group">
+                <label>Age:</label>
+                <select id="kidAge" required>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5+</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Mobile Number:</label>
+                <input type="text" id="mobile" required>
+            </div>
+            <div class="input-group">
+                <label>Town:</label>
+                <input type="text" id="town" placeholder="e.g., Patna" required>
+            </div>
+            <div class="input-group">
+                <label>State:</label>
+                <select id="state" required>
+                    <option value="Bihar">Bihar</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Gujarat">Gujarat</option>
+                    <option value="Delhi">Delhi</option>
+                </select>
+            </div>
+            <button type="submit" class="play-btn">Let's Play! 🚀</button>
+        </form>
+
+        <div id="resultArea">
+            <h2 id="welcomeMessage" style="color: #FF6347;"></h2>
+            <p style="font-size: 1.2em;">Loading <strong id="languageText"></strong>...</p>
+            <h3 id="moduleText" style="color: #32CD32;"></h3>
+        </div>
     </div>
 
-    <div class="section-header head-orange">123 NUMBERS</div>
-    <div class="grid">
-        <button class="btn btn-orange" onclick="start('num', 0, 10)">1 - 10</button>
-        <button class="btn btn-orange" onclick="start('num', 10, 20)">11 - 20</button>
-    </div>
+    <script>
+        document.getElementById('kidForm').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Stops the page from refreshing
 
-    <div class="section-header head-pink">हिन्दी वर्णमाला</div>
-    <div class="grid">
-        <button class="btn btn-pink" onclick="start('hv', 0, 13)">अ - अः</button>
-        <button class="btn btn-pink" onclick="start('hc', 0, 10)">क - ञ</button>
-        <button class="btn btn-pink" onclick="start('hc', 10, 20)">ट - न</button>
-        <button class="btn btn-pink" onclick="start('hc', 20, 36)">प - ज्ञ</button>
-    </div>
-</div>
-
-<div id="game-screen">
-    <div class="hud">
-        <div class="stat">🪙 <span id="c-val">0</span></div>
-        <div id="home-nav-btn" onclick="location.reload()">🏠 Home</div>
-        <div class="stat" id="l-val">❤️❤️❤️</div>
-    </div>
-    <div class="target-box"><div class="target-char" id="t-char">?</div></div>
-    <div class="choice-grid" id="c-grid"></div>
-</div>
-
-<div id="pop">
-    <div id="p-emoji" style="font-size: 80px;">🍎</div>
-    <h2 id="p-msg">?</h2>
-</div>
-
-<script>
-    let c = 0, lives = 3, mode = '', list = [], idx = 0;
-    
-    // --- UPDATED: Admin Tracking Function ---
-    function sendToAdmin(char, isCorrect) {
-        const status = isCorrect ? 'correct' : 'wrong';
-        // Go Backend API call
-        fetch(`http://localhost:8080/track?char=${char}&status=${status}`)
-        .catch(err => console.log("Admin Dashboard is Offline"));
-    }
-
-    const dict = {
-        'A':['A for Apple','🍎'],'B':['B for Ball','⚽'],'C':['C for Cat','🐱'],'D':['D for Dog','🐶'],'E':['E for Elephant','🐘'],'F':['F for Fish','🐟'],'G':['G for Grapes','🍇'],'H':['H for Horse','🐎'],'I':['I for Ice-cream','🍦'],'J':['J for Joker','🤡'],'K':['K for Kite','🪁'],'L':['L for Lion','🦁'],'M':['M for Monkey','🐒'],'N':['N for Nest','🪺'],'O':['O for Orange','🍊'],'P':['P for Parrot','🦜'],'Q':['Q for Queen','👸'],'R':['R for Rabbit','🐰'],'S':['S for Sun','☀️'],'T':['T for Tiger','🐯'],'U':['U for Umbrella','☂️'],'V':['V for Van','🚐'],'W':['W for Watch','⌚'],'X':['X for X-mas Tree','🎄'],'Y':['Y for Yacht','⛵'],'Z':['Z for Zebra','🦓'],
-        'अ':['अ से अनार','🍎'],'आ':['आ से आम','🥭'],'इ':['इ से इमली','🍬'],'ई':['ई से ईख','🎋'],'उ':['उ से उल्लू','🦉'],'ऊ':['ऊ से ऊन','🧶'],'ऋ':['ऋ से ऋषि','🧘'],'ए':['ए से एड़ी','🦶'],'ऐ':['ऐ से ऐनक','👓'],'ओ':['ओ से ओखली','🥣'],'औ':['औ से औरत','👩'],'अं':['अं से अंगूर','🍇'],'अः':['अः खाली','✨'],
-        'क':['क से कबूतर','🐦'],'ख':['ख से खरगोश','🐰'],'ग':['ग से गमला','🪴'],'घ':['घ से घड़ी','⌚'],'ङ':['ङ खाली','✨'],'च':['च से चम्मच','🥄'],'छ':['छ से छतरी','☂️'],'ज':['ज से जहाज','🚢'],'झ':['झ से झंडा','🇮🇳'],'ञ':['ञ खाली','✨'],'ट':['ट से टमाटर','🍅'],'ठ':['ठ से ठठेरा','⚒️'],'ड':['ड से डमरू','🥁'],'ढ':['ढ से ढक्कन','🥘'],'ण':['ण खाली','✨'],'त':['त से तरबूज','🍉'],'थ':['थ से थरमस','🍶'],'द':['द से दवात','✒️'],'ध':['ध से धनुष','🏹'],'न':['न से नल','🚰'],'प':['प से पतंग','🪁'],'फ':['फ से फल','🍎'],'ब':['ब से बत्तख','🦆'],'भ':['भ से भालू','🐻'],'म':['म से मछली','🐟'],'य':['य से यज्ञ','🔥'],'र':['र से रथ','🏇'],'ल':['ल से लट्टू','🔝'],'व':['व से वक','🦢'],'श':['श से शलजम','🥬'],'ष':['ष से षट्कोण','🔷'],'स':['स से सपेरा','🐍'],'ह':['ह से हाथी','🐘'],'क्ष':['क्ष से क्षत्रिय','⚔️'],'त्र':['त्र से त्रिशूल','🔱'],'ज्ञ':['ज्ञ से ज्ञानी','👨‍🏫']
-    };
-    const data = {
-        abc: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
-        num: "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20".split(","),
-        hv: "अआइईउऊऋएऐओऔअंअः".split(""),
-        hc: "कखगघङचछजझञटठडढणतथदधनपफबभमकयरलवशषसहक्षत्रज्ञ".split("")
-    };
-
-    function start(m, s, e) {
-        mode = m; list = data[m].slice(s, e); idx = 0; lives = 3;
-        document.getElementById('menu-screen').style.display = 'none';
-        document.getElementById('game-screen').style.display = 'block';
-        updateUI(); load();
-    }
-    function speak(t) {
-        window.speechSynthesis.cancel();
-        let m = new SpeechSynthesisUtterance(t);
-        m.lang = (mode.includes('h')) ? 'hi-IN' : 'en-US';
-        window.speechSynthesis.speak(m);
-    }
-    function load() {
-        const target = list[idx];
-        document.getElementById('t-char').innerText = target;
-        document.getElementById('c-grid').innerHTML = '';
-        let opts = [target];
-        while(opts.length < 6) {
-            let r = data[mode][Math.floor(Math.random() * data[mode].length)];
-            if(!opts.includes(r)) opts.push(r);
-        }
-        opts.sort(() => Math.random() - 0.5).forEach(o => {
-            let b = document.createElement('button');
-            b.className = 'choice-btn'; b.innerText = o;
-            b.onclick = () => {
-                if(o === target) {
-                    c++; 
-                    sendToAdmin(o, true); // --- UPDATED: Tracking Success ---
-                    let info = dict[o] || [o, '🌟'];
-                    speak(info[0]);
-                    document.getElementById('p-emoji').innerText = info[1];
-                    document.getElementById('p-msg').innerText = info[0];
-                    document.getElementById('pop').style.display = 'block';
-                    updateUI();
-                    setTimeout(() => {
-                        document.getElementById('pop').style.display = 'none';
-                        idx++; if(idx >= list.length) location.reload(); else load();
-                    }, 2000);
-                } else {
-                    lives--; 
-                    sendToAdmin(target, false); // --- UPDATED: Tracking Error ---
-                    updateUI(); if(lives <= 0) location.reload();
-                }
+            // Gather the data from the form
+            const profileData = {
+                name: document.getElementById('kidName').value,
+                age: parseInt(document.getElementById('kidAge').value),
+                mobile: document.getElementById('mobile').value,
+                town: document.getElementById('town').value,
+                state: document.getElementById('state').value
             };
-            document.getElementById('c-grid').appendChild(b);
+
+            try {
+                // Send the data to your Go server
+                const response = await fetch('http://localhost:8080/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(profileData)
+                });
+
+                const result = await response.json();
+
+                // Hide the form and show the server's response
+                document.getElementById('kidForm').style.display = 'none';
+                document.getElementById('resultArea').style.display = 'block';
+                
+                document.getElementById('welcomeMessage').innerText = result.message;
+                document.getElementById('languageText').innerText = result.language;
+                document.getElementById('moduleText').innerText = result.module;
+
+                // --- NEW CODE: Save language and teleport to dashboard ---
+                
+                // 1. Save the language to the browser's memory so the next page knows what to load
+                localStorage.setItem('kidLanguage', result.language);
+                localStorage.setItem('kidModule', result.module);
+
+                // 2. Wait 3 seconds, then redirect to the game dashboard
+                setTimeout(() => {
+                    window.location.href = "dashboard.html";
+                }, 3000);
+
+            } catch (error) {
+                alert("Could not connect to the server. Is your Go backend running?");
+            }
         });
-        setTimeout(() => speak((mode.includes('h') ? "कहाँ है " : "Find ") + target), 100);
-    }
-    function updateUI() {
-        document.getElementById('c-val').innerText = c;
-        let h = ""; for(let i=0; i<lives; i++) h += "❤️";
-        document.getElementById('l-val').innerText = h || "💔";
-    }
-</script>
+    </script>
 </body>
 </html>

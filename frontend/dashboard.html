@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kid World - Dashboard</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            background-color: #FFECB3;
+            text-align: center;
+            padding: 50px;
+        }
+        h1 { color: #FF6347; font-size: 3em; }
+        .game-menu {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .game-card {
+            background-color: white;
+            border: 5px solid;
+            border-radius: 20px;
+            padding: 30px;
+            width: 200px;
+            cursor: pointer;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .game-card:active { transform: translateY(10px); box-shadow: 0 0 0; }
+        .game-card h2 { margin: 0; font-size: 2em; }
+        
+        #card-abc { border-color: #32CD32; color: #32CD32; }
+        #card-123 { border-color: #1E90FF; color: #1E90FF; }
+        #card-regional { border-color: #FF69B4; color: #FF69B4; }
+    </style>
+</head>
+<body>
+
+    <h1>Choose a Game! 🎮</h1>
+
+    <div class="game-menu">
+        <div class="game-card" id="card-abc" onclick="startGame('abc')">
+            <h2>A B C</h2>
+            <p>Learn English</p>
+        </div>
+
+        <div class="game-card" id="card-123" onclick="startGame('num')">
+            <h2>1 2 3</h2>
+            <p>Learn Numbers</p>
+        </div>
+
+        <div class="game-card" id="card-regional" onclick="startGame('hv')">
+            <h2 id="regionalTitle">...</h2>
+            <p id="regionalSub">Loading...</p>
+        </div>
+    </div>
+
+    <script>
+        const savedLanguage = localStorage.getItem('kidLanguage') || "Regional";
+        const savedModule = localStorage.getItem('kidModule') || "Language";
+
+        document.getElementById('regionalTitle').innerText = savedLanguage;
+        document.getElementById('regionalSub').innerText = savedModule;
+
+        // NEW: This tells the game.html page which array to load before teleporting
+        function startGame(selectedMode) {
+            localStorage.setItem('gameMode', selectedMode);
+            window.location.href = "game.html";
+        }
+    </script>
+</body>
+</html>
