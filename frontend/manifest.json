@@ -1,0 +1,15 @@
+{
+  "name": "Kids World Premium",
+  "short_name": "KidsWorld",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#E3F2FD",
+  "theme_color": "#42A5F5",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
