@@ -1,0 +1,10 @@
+CREATE TABLE KidsProfile (
+    ProfileID INT AUTO_INCREMENT PRIMARY KEY,
+    KidName VARCHAR(100) NOT NULL,
+    Age INT NOT NULL,
+    MobileNo VARCHAR(15) NOT NULL,
+    Town VARCHAR(100),
+    State VARCHAR(50) NOT NULL,
+    LanguagePreference VARCHAR(50),
+    CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
