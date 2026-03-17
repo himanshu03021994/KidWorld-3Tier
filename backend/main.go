@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -69,15 +70,29 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func main() {
-	// 1. Host the Frontend Website
-	fs := http.FileServer(http.Dir("../frontend"))
-	http.Handle("/", fs)
+	func main() {
+	// 1. New Regional Alphabet Route
+	http.HandleFunc("/get-alphabet", func(w http.ResponseWriter, r *http.Request) {
+		// Allow any website to read this data (CORS bypass)
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Content-Type", "application/json")
 
-	// 2. Host the Backend API
-	http.HandleFunc("/api/register", registerHandler)
+		// Get the state from the URL, default to Bihar if none is provided
+		state := r.URL.Query().Get("state")
+		data, exists := RegionalData[state]
+		if !exists {
+			data = RegionalData["Bihar"] 
+		}
+		
+		json.NewEncoder(w).Encode(data)
+	})
 
-	fmt.Println("🚀 Kid World is LIVE!")
-	fmt.Println("👉 Open Chrome and go to: http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	// 2. Cloud-Ready Port Setup (Crucial for Render)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Fallback for your local laptop
+	}
+
+	fmt.Println("Kid World Server starting on port " + port + "...")
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
