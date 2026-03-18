@@ -6,93 +6,142 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 )
 
-type KidProfile struct {
-	Name     string `json:"name"`
-	Age      int    `json:"age"`
-	MobileNo string `json:"mobile"`
-	Town     string `json:"town"`
-	State    string `json:"state"`
+// LetterData represents a single alphabet entry
+type LetterData struct {
+	Letter string `json:"letter"`
+	Word   string `json:"word"`
+	Emoji  string `json:"emoji"`
 }
 
-type AppResponse struct {
-	Message  string `json:"message"`
-	Language string `json:"language"`
-	Module   string `json:"module"`
+// RegionalData stores the alphabets for each supported language
+var RegionalData = map[string][]LetterData{
+	"Hindi": {
+		{"अ", "Anaar (Pomegranate)", "🍎"},
+		{"आ", "Aam (Mango)", "🥭"},
+		{"इ", "Imli (Tamarind)", "🫘"},
+		{"ई", "Eekh (Sugarcane)", "🎋"},
+		{"उ", "Ullu (Owl)", "🦉"},
+		{"ऊ", "Oon (Wool)", "🧶"},
+		{"ए", "Ek (One)", "1️⃣"},
+		{"ऐ", "Ainak (Spectacles)", "👓"},
+		{"ओ", "Okhli (Mortar)", "🥣"},
+		{"औ", "Aurat (Woman)", "👩"},
+		{"क", "Kabootar (Pigeon)", "🕊️"},
+		{"ख", "Khargosh (Rabbit)", "🐇"},
+		{"ग", "Gamla (Flower Pot)", "🪴"},
+		{"घ", "Ghar (House)", "🏠"},
+	},
+	"Punjabi": {
+		{"ੳ", "Ooth (Camel)", "🐪"},
+		{"ਅ", "Anaar (Pomegranate)", "🍎"},
+		{"ੲ", "Itt (Brick)", "🧱"},
+		{"ਸ", "Saeb (Apple)", "🍏"},
+		{"ਹ", "Hathi (Elephant)", "🐘"},
+		{"ਕ", "Kabootar (Pigeon)", "🕊️"},
+		{"ਖ", "Khamb (Feather)", "🪶"},
+		{"ਗ", "Gamla (Flower Pot)", "🪴"},
+		{"ਘ", "Ghar (House)", "🏠"},
+	},
+	"Marathi": {
+		{"अ", "Ananas (Pineapple)", "🍍"},
+		{"आ", "Aai (Mother)", "👩‍👦"},
+		{"इ", "Imarat (Building)", "🏢"},
+		{"ई", "Idlimbu (Lemon)", "🍋"},
+		{"उ", "Undir (Mouse)", "🐁"},
+		{"ऊ", "Oos (Sugarcane)", "🎋"},
+		{"ए", "Edka (Ram)", "🐏"},
+		{"ऐ", "Airan (Anvil)", "🗜️"},
+		{"ओ", "Oze (Load)", "🎒"},
+		{"औ", "Aushadh (Medicine)", "💊"},
+	},
+	"Gujarati": {
+		{"અ", "Ananas (Pineapple)", "🍍"},
+		{"આ", "Aag (Fire)", "🔥"},
+		{"ઇ", "Iyal (Caterpillar)", "🐛"},
+		{"ઈ", "Eesh (God)", "✨"},
+		{"ઉ", "Undar (Mouse)", "🐁"},
+		{"ઊ", "Oon (Wool)", "🧶"},
+		{"એ", "Ek (One)", "1️⃣"},
+		{"ઐ", "Airavat (Elephant)", "🐘"},
+		{"ઓ", "Oshiku (Pillow)", "🛌"},
+		{"ઔ", "Aushadh (Medicine)", "💊"},
+	},
 }
 
-func registerHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-	if r.Method == http.MethodOptions {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "Please send a POST request", http.StatusMethodNotAllowed)
-		return
-	}
-
-	var profile KidProfile
-	err := json.NewDecoder(r.Body).Decode(&profile)
-	if err != nil {
-		http.Error(w, "Invalid data format", http.StatusBadRequest)
-		return
-	}
-
-	state := strings.ToLower(profile.State)
-	language := "English"
-	module := "Standard ABCs"
-
-	switch state {
-	case "bihar", "uttar pradesh", "madhya pradesh":
-		language = "Hindi"
-		module = "Varnamala (क से कबूतर)"
-	case "maharashtra":
-		language = "Marathi"
-		module = "Marathi Mulakshare"
-	case "gujarat":
-		language = "Gujarati"
-		module = "Gujarati Kakko"
-	}
-
-	response := AppResponse{
-		Message:  fmt.Sprintf("Welcome to Kid World, %s!", profile.Name),
-		Language: language,
-		Module:   module,
-	}
-
-	json.NewEncoder(w).Encode(response)
+// enableCORS is a helper function to allow frontend to talk to backend
+func enableCORS(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
-	func main() {
-	// 1. New Regional Alphabet Route
-	http.HandleFunc("/get-alphabet", func(w http.ResponseWriter, r *http.Request) {
-		// Allow any website to read this data (CORS bypass)
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Content-Type", "application/json")
-
-		// Get the state from the URL, default to Bihar if none is provided
-		state := r.URL.Query().Get("state")
-		data, exists := RegionalData[state]
-		if !exists {
-			data = RegionalData["Bihar"] 
+func main() {
+	// Route 1: Setup User Profile & Language
+	http.HandleFunc("/setup", func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(&w)
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
 		}
+
+		var profile map[string]interface{}
+		json.NewDecoder(r.Body).Decode(&profile)
+
+		name := "Kid"
+		state := "Bihar" // Defaults
+		if n, ok := profile["name"].(string); ok { name = n }
+		if s, ok := profile["state"].(string); ok { state = s }
+
+		language := "Hindi"
+		module := "Varnamala"
+
+		if state == "Punjab" {
+			language = "Punjabi"
+			module = "Gurmukhi"
+		} else if state == "Maharashtra" {
+			language = "Marathi"
+			module = "Mulakhshare"
+		} else if state == "Gujarat" {
+			language = "Gujarati"
+			module = "Kakko"
+		}
+
+		response := map[string]string{
+			"message":  "Welcome " + name + "!",
+			"language": language,
+			"module":   module,
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+	})
+
+	// Route 2: Fetch Alphabet Data for the Game
+	http.HandleFunc("/get-alphabet", func(w http.ResponseWriter, r *http.Request) {
+		enableCORS(&w)
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		state := r.URL.Query().Get("state")
+		language := "Hindi" 
 		
+		if state == "Punjab" { language = "Punjabi" } else if state == "Maharashtra" { language = "Marathi" } else if state == "Gujarat" { language = "Gujarati" }
+
+		data := RegionalData[language]
+
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(data)
 	})
 
-	// 2. Cloud-Ready Port Setup (Crucial for Render)
+	// Start the server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // Fallback for your local laptop
+		port = "8080"
 	}
-
-	fmt.Println("Kid World Server starting on port " + port + "...")
+	fmt.Println("Server running on port:", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
