@@ -90,51 +90,39 @@
     </div>
 
     <script>
-        document.getElementById('kidForm').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Stops the page from refreshing
+        document.getElementById('kidForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Stops the page from refreshing
 
-            // Gather the data from the form
-            const profileData = {
-                name: document.getElementById('kidName').value,
-                age: parseInt(document.getElementById('kidAge').value),
-                mobile: document.getElementById('mobile').value,
-                town: document.getElementById('town').value,
-                state: document.getElementById('state').value
-            };
+    // 1. Get user inputs
+    const kidName = document.getElementById('kidName').value;
+    const state = document.getElementById('state').value;
 
-            try {
-                // Send the data to your Go server
-                const response = await fetch('http://localhost:8080/api/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(profileData)
-                });
+    // 2. Decide Language logically based on State
+    let language = "Hindi";
+    let moduleText = "Varnamala";
+    
+    if(state === "Punjab") { language = "Punjabi"; moduleText = "Gurmukhi"; }
+    else if(state === "Maharashtra") { language = "Marathi"; moduleText = "Mulakhshare"; }
+    else if(state === "Gujarat") { language = "Gujarati"; moduleText = "Kakko"; }
 
-                const result = await response.json();
+    // 3. Show Loading Screen
+    document.getElementById('kidForm').style.display = 'none';
+    document.getElementById('resultArea').style.display = 'block';
+    
+    document.getElementById('welcomeMessage').innerText = "Welcome " + kidName + "!";
+    document.getElementById('languageText').innerText = language;
+    document.getElementById('moduleText').innerText = moduleText;
 
-                // Hide the form and show the server's response
-                document.getElementById('kidForm').style.display = 'none';
-                document.getElementById('resultArea').style.display = 'block';
-                
-                document.getElementById('welcomeMessage').innerText = result.message;
-                document.getElementById('languageText').innerText = result.language;
-                document.getElementById('moduleText').innerText = result.module;
+    // 4. Save data for the Dashboard (Crucial Step!)
+    localStorage.setItem('kidName', kidName);
+    localStorage.setItem('kidState', state);
+    localStorage.setItem('kidLanguage', language);
 
-                // --- NEW CODE: Save language and teleport to dashboard ---
-                
-                // 1. Save the language to the browser's memory so the next page knows what to load
-                localStorage.setItem('kidLanguage', result.language);
-                localStorage.setItem('kidModule', result.module);
-
-                // 2. Wait 3 seconds, then redirect to the game dashboard
-                setTimeout(() => {
-                    window.location.href = "dashboard.html";
-                }, 3000);
-
-            } catch (error) {
-                alert("Could not connect to the server. Is your Go backend running?");
-            }
-        });
+    // 5. Teleport to Dashboard after 3 seconds
+    setTimeout(() => {
+        window.location.href = "dashboard.html";
+    }, 3000);
+});
     </script>
 </body>
 </html>

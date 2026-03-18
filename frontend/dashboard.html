@@ -7,68 +7,164 @@
     <style>
         body {
             font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-            background-color: #FFECB3;
+            background-color: #D6EAF8; /* Light blue background from your design */
+            margin: 0;
+            padding: 20px;
             text-align: center;
-            padding: 50px;
         }
-        h1 { color: #FF6347; font-size: 3em; }
-        .game-menu {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 40px;
-            flex-wrap: wrap;
-        }
-        .game-card {
-            background-color: white;
-            border: 5px solid;
-            border-radius: 20px;
-            padding: 30px;
-            width: 200px;
-            cursor: pointer;
-            box-shadow: 0 10px 0 rgba(0,0,0,0.1);
-            transition: transform 0.2s;
-        }
-        .game-card:active { transform: translateY(10px); box-shadow: 0 0 0; }
-        .game-card h2 { margin: 0; font-size: 2em; }
         
-        #card-abc { border-color: #32CD32; color: #32CD32; }
-        #card-123 { border-color: #1E90FF; color: #1E90FF; }
-        #card-regional { border-color: #FF69B4; color: #FF69B4; }
+        /* Top White Title Card */
+        .header-card {
+            background: white;
+            padding: 20px;
+            border-radius: 40px;
+            display: inline-block;
+            width: 90%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .header-card h1 {
+            margin: 0;
+            color: #2C3E50;
+            font-size: 2.5em;
+            letter-spacing: 2px;
+        }
+        
+        #loading-status {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        /* Section Layouts */
+        .section {
+            max-width: 800px;
+            margin: 0 auto 30px auto;
+            width: 95%;
+        }
+        .main-bar {
+            color: white;
+            padding: 15px;
+            border-radius: 40px;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            text-transform: uppercase;
+        }
+        .sub-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .sub-btn {
+            color: white;
+            padding: 15px;
+            border-radius: 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+            transition: transform 0.1s;
+        }
+        .sub-btn:active { transform: translateY(4px); box-shadow: 0 0 0; }
+
+        /* Specific Colors matching your design */
+        .bg-blue { background-color: #3498DB; }
+        .bg-blue-light { background-color: #85C1E9; color: #2C3E50; }
+        
+        .bg-orange { background-color: #F39C12; }
+        .bg-orange-light { background-color: #F8C471; color: #2C3E50; }
+        
+        .bg-pink { background-color: #E84C3D; } 
+        .bg-pink-light { background-color: #F1948A; color: white; }
+
+        /* Handle 4 buttons in regional */
+        .regional-grid {
+            grid-template-columns: 1fr 1fr;
+            display: grid;
+            gap: 15px;
+        }
+        @media (max-width: 600px) {
+            .sub-grid, .regional-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-    <h1>Choose a Game! 🎮</h1>
+    <div class="header-card">
+        <h1 id="welcomeText">KIDS WORLD 🌈</h1>
+    </div>
+    
+    <div id="loading-status">☁️ Connecting to Cloud...</div>
 
-    <div class="game-menu">
-        <div class="game-card" id="card-abc" onclick="startGame('abc')">
-            <h2>A B C</h2>
-            <p>Learn English</p>
+    <div class="section">
+        <div class="main-bar bg-blue">ABC ALPHABETS</div>
+        <div class="sub-grid">
+            <button class="sub-btn bg-blue-light" onclick="startGame('abc')">A - M</button>
+            <button class="sub-btn bg-blue-light" onclick="startGame('abc')">N - Z</button>
         </div>
+    </div>
 
-        <div class="game-card" id="card-123" onclick="startGame('num')">
-            <h2>1 2 3</h2>
-            <p>Learn Numbers</p>
+    <div class="section">
+        <div class="main-bar bg-orange">123 NUMBERS</div>
+        <div class="sub-grid">
+            <button class="sub-btn bg-orange-light" onclick="startGame('num')">1 - 10</button>
+            <button class="sub-btn bg-orange-light" onclick="startGame('num')">11 - 20</button>
         </div>
+    </div>
 
-        <div class="game-card" id="card-regional" onclick="startGame('hv')">
-            <h2 id="regionalTitle">...</h2>
-            <p id="regionalSub">Loading...</p>
+    <div class="section">
+        <div class="main-bar bg-pink" id="regionalTitle">हिन्दी वर्णमाला</div>
+        <div class="regional-grid" id="regionalButtons">
+            <button class="sub-btn bg-pink-light" onclick="startGame('regional')">अ - अः</button>
+            <button class="sub-btn bg-pink-light" onclick="startGame('regional')">क - ञ</button>
+            <button class="sub-btn bg-pink-light" onclick="startGame('regional')">ट - न</button>
+            <button class="sub-btn bg-pink-light" onclick="startGame('regional')">प - ज्ञ</button>
         </div>
     </div>
 
     <script>
-        const savedLanguage = localStorage.getItem('kidLanguage') || "Regional";
-        const savedModule = localStorage.getItem('kidModule') || "Language";
+        // 1. Get User Info from LocalStorage
+        const kidName = localStorage.getItem('kidName') || "Kid";
+        const userState = localStorage.getItem('kidState') || "Bihar";
+        const savedLanguage = localStorage.getItem('kidLanguage') || "Regional Language";
 
-        document.getElementById('regionalTitle').innerText = savedLanguage;
-        document.getElementById('regionalSub').innerText = savedModule;
+        // 2. Personalize the Dashboard UI
+        // Adds kid's name to the title!
+        document.getElementById('welcomeText').innerText = kidName.toUpperCase() + "'S WORLD 🌈";
+        
+        // Dynamically set the Regional Title (e.g., "Gurmukhi" if Punjab, "Varnamala" if Bihar)
+        document.getElementById('regionalTitle').innerText = savedLanguage.toUpperCase();
 
-        // NEW: This tells the game.html page which array to load before teleporting
+        // 3. THE MAGIC: Pre-fetch data from Cloud so the game starts instantly!
+        async function preFetchGameData() {
+            try {
+                const response = await fetch(`https://kidworld.onrender.com/get-alphabet?state=${userState}`);
+                const gameData = await response.json();
+                
+                localStorage.setItem('cloudGameData', JSON.stringify(gameData));
+                
+                document.getElementById('loading-status').innerText = "✅ Cloud Data Ready!";
+                document.getElementById('loading-status').style.color = "#27AE60";
+                
+            } catch (error) {
+                console.error("Cloud connection failed:", error);
+                document.getElementById('loading-status').innerText = "❌ Cloud Connection Failed.";
+                document.getElementById('loading-status').style.color = "#E84C3D";
+            }
+        }
+
+        preFetchGameData();
+
+        // 4. Navigate to Game
         function startGame(selectedMode) {
+            // Note: Right now, all sub-buttons load the full array in game.html. 
+            // We can split the arrays (A-M vs N-Z) in game.html later if needed!
             localStorage.setItem('gameMode', selectedMode);
-            window.location.href = "game.html";
+            window.location.href = "game.html"; 
         }
     </script>
 </body>
