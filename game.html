@@ -3,299 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kid World - Play</title>
+    <title>Kid World - Playing...</title>
     <style>
         body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-            background-color: #E3F2FD; /* Light blue background */
+            font-family: 'Arial Unicode MS', 'Comic Sans MS', sans-serif;
+            background-color: #F7DC6F;
+            text-align: center;
             margin: 0;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 95vh;
-            box-sizing: border-box;
+            padding: 20px;
+            transition: direction 0.5s ease; /* Smooth flip for RTL */
         }
-
-        /* Top Bar: Coins, Home, Lives */
-        .top-bar {
+        .game-container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .stats-bar {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 500px;
+            font-size: 1.5em;
             margin-bottom: 20px;
+            padding: 10px;
+            background: #fef9e7;
+            border-radius: 15px;
         }
-        .pill {
-            background: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 1.2em;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .home-btn {
-            cursor: pointer;
-            border: none;
-            color: #555;
-            text-decoration: none;
-        }
-        .home-btn:active { transform: scale(0.95); }
-        .coins { color: #555; }
-        .lives { color: #FF4757; letter-spacing: 2px; }
-
-        /* Main Display Card */
-        .main-card {
-            background-color: white;
-            border-radius: 40px;
-            width: 100%;
-            max-width: 400px;
-            min-height: 220px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-            position: relative;
-        }
-        #targetLetter {
-            font-size: 7em;
-            color: #42A5F5; /* Blue color from your screenshot */
-            margin: 0;
-            user-select: none;
-        }
-
-        /* Success Pop-up Card (Hidden by default) */
-        .success-card {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: white;
-            border: 8px solid #FFA502; /* Yellow/Orange border */
-            border-radius: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            z-index: 10;
-        }
-        .success-card.show {
-            opacity: 1;
-        }
-        #successEmoji { font-size: 6em; margin: 0; line-height: 1; }
-        #successText { font-size: 1.8em; color: #2F3542; margin: 10px 0 0 0; }
-
-        /* Sound Button */
-        .sound-btn {
-            position: absolute;
-            top: 15px; right: 15px;
-            background: none; border: none;
-            font-size: 1.5em; cursor: pointer;
-            opacity: 0.5;
-        }
-
-        /* 6 Button Grid */
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr); /* 3 columns for 6 buttons */
-            gap: 15px;
-            width: 100%;
-            max-width: 400px;
-        }
-        .option-btn {
-            background-color: #66BB6A; /* Green from your screenshot */
-            color: white;
-            border: none;
-            padding: 20px 0;
-            font-size: 2.5em;
+        .target-box {
+            font-size: 5em;
+            background: #EBEDEF;
+            padding: 20px;
             border-radius: 20px;
+            margin-bottom: 20px;
+            color: #2C3E50;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        .btn-option {
+            font-size: 2.5em;
+            padding: 20px;
+            border: none;
+            border-radius: 15px;
+            background: #3498DB;
+            color: white;
             cursor: pointer;
-            box-shadow: 0 6px 0 #43A047; /* Bottom shadow */
-            transition: transform 0.1s, box-shadow 0.1s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-shadow: 0 5px 0 #2980B9;
+            transition: 0.1s;
         }
-        .option-btn:active {
-            transform: translateY(6px);
-            box-shadow: 0 0 0 #43A047;
-        }
+        .btn-option:active { transform: translateY(4px); box-shadow: 0 1px 0 #2980B9; }
         
-        /* Wrong Answer Animation */
-        .wrong { background-color: #FF4757 !important; box-shadow: 0 6px 0 #FF0000 !important; }
-        .shake { animation: shake 0.4s; }
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            50% { transform: translateX(5px); }
-            75% { transform: translateX(-5px); }
-            100% { transform: translateX(0); }
-        }
+        /* Urdu/RTL Logic */
+        .rtl-mode { direction: rtl; text-align: right; }
     </style>
 </head>
 <body>
 
-    <div class="top-bar">
-        <div class="pill coins">🪙 <span id="coinText">0</span></div>
-        <button class="pill home-btn" onclick="window.location.href='dashboard.html'">🏠 Home</button>
-        <div class="pill lives" id="livesText">❤️❤️❤️</div>
+<div class="game-container" id="mainContainer">
+    <div class="stats-bar">
+        <span>🪙 <span id="coins">0</span></span>
+        <span>❤️❤️❤️</span>
     </div>
 
-    <div class="main-card" id="cardContainer">
-        <h1 id="targetLetter">A</h1>
-        <button class="sound-btn" onclick="repeatQuestion()">🔊</button>
-        
-        <div class="success-card" id="successOverlay">
-            <div id="successEmoji">🍎</div>
-            <h2 id="successText">A for Apple</h2>
+    <div class="target-box" id="targetLetter">?</div>
+    <h2 id="instruction">Find the letter!</h2>
+
+    <div class="grid" id="optionsGrid">
         </div>
-    </div>
+</div>
 
-    <div class="options-grid" id="optionsContainer">
-        </div>
+<script>
+    let currentData = null;
+    let target = "";
+    let coins = 0;
 
-    <script>
-        // --- 1. DATA PREPARATION ---
-        const dict = {
-            'A':['A for Apple','🍎'],'B':['B for Ball','⚽'],'C':['C for Cat','🐱'],'D':['D for Dog','🐶'],'E':['E for Elephant','🐘'],'F':['F for Fish','🐟'],'G':['G for Grapes','🍇'],'H':['H for Horse','🐎'],'I':['I for Ice-cream','🍦'],'J':['J for Joker','🤡'],'K':['K for Kite','🪁'],'L':['L for Lion','🦁'],'M':['M for Monkey','🐒'],'N':['N for Nest','🪺'],'O':['O for Orange','🍊'],'P':['P for Parrot','🦜'],'Q':['Q for Queen','👸'],'R':['R for Rabbit','🐰'],'S':['S for Sun','☀️'],'T':['T for Tiger','🐯'],'U':['U for Umbrella','☂️'],'V':['V for Van','🚐'],'W':['W for Watch','⌚'],'X':['X for X-mas Tree','🎄'],'Y':['Y for Yacht','⛵'],'Z':['Z for Zebra','🦓']
-        };
-        const staticData = {
-            abc: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
-            num: "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20".split(",")
-        };
+    // 1. Initialize Game with 11-Script Support
+    function initGame() {
+        const rawData = localStorage.getItem('cloudGameData');
+        if (!rawData) {
+            alert("No data found! Please go back to Dashboard.");
+            return;
+        }
+        currentData = JSON.parse(rawData);
 
-        let mode = localStorage.getItem('gameMode') || 'abc'; 
-        let kidLanguage = localStorage.getItem('kidLanguage') || 'Hindi';
-        let gameItems = []; 
+        // RTL Support Check (Urdu Logic)
+        if (currentData.direction === "rtl") {
+            document.body.classList.add('rtl-mode');
+            document.getElementById('mainContainer').classList.add('rtl-mode');
+        }
 
-        if (mode === 'regional') {
-            const cloudDataRaw = localStorage.getItem('cloudGameData');
-            if (cloudDataRaw) gameItems = JSON.parse(cloudDataRaw);
+        generateRound();
+    }
+
+    // 2. Generate Round (6 Button Logic)
+    function generateRound() {
+        const alphabets = currentData.alphabets;
+        target = alphabets[Math.floor(Math.random() * alphabets.length)];
+        document.getElementById('targetLetter').innerText = target;
+
+        // Shuffle and pick 5 wrong ones
+        let options = [target];
+        while (options.length < 6) {
+            let randomChar = alphabets[Math.floor(Math.random() * alphabets.length)];
+            if (!options.includes(randomChar)) options.push(randomChar);
+        }
+        options.sort(() => Math.random() - 0.5);
+
+        // Render Buttons
+        const grid = document.getElementById('optionsGrid');
+        grid.innerHTML = "";
+        options.forEach(char => {
+            const btn = document.createElement('button');
+            btn.className = "btn-option";
+            btn.innerText = char;
+            btn.onclick = () => checkAnswer(char, btn);
+            grid.appendChild(btn);
+        });
+
+        // Voice Engine Call
+        speak(`Find ${target}`);
+    }
+
+    // 3. AI Voice Engine (Regional Accent Support)
+    function speak(text) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = currentData.langCode; // e.g., 'hi-IN', 'pa-IN', 'ur-IN'
+        msg.rate = 0.9; // Slightly slower for kids
+        window.speechSynthesis.speak(msg);
+    }
+
+    // 4. Check Answer
+    function checkAnswer(selected, btn) {
+        if (selected === target) {
+            coins += 10;
+            document.getElementById('coins').innerText = coins;
+            btn.style.backgroundColor = "#27AE60";
+            speak("Correct!");
+            setTimeout(generateRound, 1000);
         } else {
-            gameItems = staticData[mode].map(char => {
-                if (dict[char]) return { letter: char, emoji: dict[char][1], word: dict[char][0] };
-                return { letter: char, emoji: "⭐", word: char };
-            });
+            btn.style.backgroundColor = "#E74C3C";
+            speak("Try again!");
         }
+    }
 
-        // --- 2. VOICE ENGINE ---
-        function speak(text) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel(); 
-                let msg = new SpeechSynthesisUtterance(text);
-                
-                if (mode === 'regional') {
-                    if (kidLanguage === 'Punjabi') msg.lang = 'pa-IN';
-                    else if (kidLanguage === 'Gujarati') msg.lang = 'gu-IN';
-                    else if (kidLanguage === 'Marathi') msg.lang = 'mr-IN';
-                    else msg.lang = 'hi-IN'; 
-                } else {
-                    msg.lang = 'en-IN'; 
-                }
-                msg.rate = 0.85; 
-                window.speechSynthesis.speak(msg);
-            }
-        }
+    window.onload = initGame;
+</script>
 
-        // --- 3. GAME LOGIC ---
-        let currentIndex = 0; 
-        let lives = 3;
-        let coins = 0;
-        let currentTarget = null;
-
-        function updateLivesUI() {
-            let hearts = "";
-            for(let i=0; i<lives; i++) hearts += "❤️";
-            document.getElementById('livesText').innerText = hearts === "" ? "💔" : hearts;
-        }
-
-        function generateQuestion() {
-            if (currentIndex >= gameItems.length) currentIndex = 0; 
-            currentTarget = gameItems[currentIndex];
-            
-            // Hide success overlay, show letter
-            document.getElementById('successOverlay').classList.remove('show');
-            document.getElementById('targetLetter').innerText = currentTarget.letter;
-
-            // Generate 6 Options (1 Correct + 5 Wrong)
-            let options = [currentTarget.letter];
-            while(options.length < 6) { // Changed to 6!
-                let randomLetter = gameItems[Math.floor(Math.random() * gameItems.length)].letter;
-                if(!options.includes(randomLetter)) {
-                    options.push(randomLetter);
-                }
-            }
-            options.sort(() => Math.random() - 0.5);
-
-            const container = document.getElementById('optionsContainer');
-            container.innerHTML = ""; 
-            
-            options.forEach(opt => {
-                let btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(opt, btn);
-                container.appendChild(btn);
-            });
-
-            let questionText = (mode === 'regional') ? currentTarget.letter + " कहाँ है?" : "Find " + currentTarget.letter;
-            speak(questionText);
-        }
-
-        function repeatQuestion() {
-            let questionText = (mode === 'regional') ? currentTarget.letter + " कहाँ है?" : "Find " + currentTarget.letter;
-            speak(questionText);
-        }
-
-        function checkAnswer(selectedLetter, btnElement) {
-            let allBtns = document.querySelectorAll('.option-btn');
-            allBtns.forEach(b => b.disabled = true);
-
-            if (selectedLetter === currentTarget.letter) {
-                // 🎉 CORRECT
-                coins += 1; // 1 coin per correct answer
-                document.getElementById('coinText').innerText = coins;
-                
-                // SHOW POPUP
-                document.getElementById('successEmoji').innerText = currentTarget.emoji;
-                document.getElementById('successText').innerText = currentTarget.word;
-                document.getElementById('successOverlay').classList.add('show');
-                
-                speak(currentTarget.word);
-                
-                currentIndex++;
-                setTimeout(generateQuestion, 2500); 
-
-            } else {
-                // ❌ WRONG
-                btnElement.classList.add('wrong', 'shake');
-                lives--;
-                updateLivesUI();
-                
-                if (lives <= 0) {
-                    speak(mode === 'regional' ? "फिर से शुरू करते हैं।" : "Let's start again.");
-                    setTimeout(() => {
-                        lives = 3; currentIndex = 0; coins = 0;
-                        document.getElementById('coinText').innerText = coins;
-                        updateLivesUI();
-                        generateQuestion();
-                    }, 2000);
-                } else {
-                    speak("Try again!");
-                    setTimeout(() => {
-                        btnElement.classList.remove('wrong', 'shake');
-                        allBtns.forEach(b => b.disabled = false);
-                    }, 1000);
-                }
-            }
-        }
-
-        setTimeout(generateQuestion, 500);
-    </script>
 </body>
 </html>

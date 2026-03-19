@@ -2,146 +2,46 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 )
 
-// LetterData represents a single alphabet entry
-type LetterData struct {
-	Letter string `json:"letter"`
-	Word   string `json:"word"`
-	Emoji  string `json:"emoji"`
+type LanguageProfile struct {
+	Script    string   `json:"script"`
+	LangCode  string   `json:"langCode"`
+	Direction string   `json:"direction"`
+	Alphabets []string `json:"alphabets"`
 }
 
-// RegionalData stores the alphabets for each supported language
-var RegionalData = map[string][]LetterData{
-	"Hindi": {
-		{"अ", "Anaar (Pomegranate)", "🍎"},
-		{"आ", "Aam (Mango)", "🥭"},
-		{"इ", "Imli (Tamarind)", "🫘"},
-		{"ई", "Eekh (Sugarcane)", "🎋"},
-		{"उ", "Ullu (Owl)", "🦉"},
-		{"ऊ", "Oon (Wool)", "🧶"},
-		{"ए", "Ek (One)", "1️⃣"},
-		{"ऐ", "Ainak (Spectacles)", "👓"},
-		{"ओ", "Okhli (Mortar)", "🥣"},
-		{"औ", "Aurat (Woman)", "👩"},
-		{"क", "Kabootar (Pigeon)", "🕊️"},
-		{"ख", "Khargosh (Rabbit)", "🐇"},
-		{"ग", "Gamla (Flower Pot)", "🪴"},
-		{"घ", "Ghar (House)", "🏠"},
-	},
-	"Punjabi": {
-		{"ੳ", "Ooth (Camel)", "🐪"},
-		{"ਅ", "Anaar (Pomegranate)", "🍎"},
-		{"ੲ", "Itt (Brick)", "🧱"},
-		{"ਸ", "Saeb (Apple)", "🍏"},
-		{"ਹ", "Hathi (Elephant)", "🐘"},
-		{"ਕ", "Kabootar (Pigeon)", "🕊️"},
-		{"ਖ", "Khamb (Feather)", "🪶"},
-		{"ਗ", "Gamla (Flower Pot)", "🪴"},
-		{"ਘ", "Ghar (House)", "🏠"},
-	},
-	"Marathi": {
-		{"अ", "Ananas (Pineapple)", "🍍"},
-		{"आ", "Aai (Mother)", "👩‍👦"},
-		{"इ", "Imarat (Building)", "🏢"},
-		{"ई", "Idlimbu (Lemon)", "🍋"},
-		{"उ", "Undir (Mouse)", "🐁"},
-		{"ऊ", "Oos (Sugarcane)", "🎋"},
-		{"ए", "Edka (Ram)", "🐏"},
-		{"ऐ", "Airan (Anvil)", "🗜️"},
-		{"ओ", "Oze (Load)", "🎒"},
-		{"औ", "Aushadh (Medicine)", "💊"},
-	},
-	"Gujarati": {
-		{"અ", "Ananas (Pineapple)", "🍍"},
-		{"આ", "Aag (Fire)", "🔥"},
-		{"ઇ", "Iyal (Caterpillar)", "🐛"},
-		{"ઈ", "Eesh (God)", "✨"},
-		{"ઉ", "Undar (Mouse)", "🐁"},
-		{"ઊ", "Oon (Wool)", "🧶"},
-		{"એ", "Ek (One)", "1️⃣"},
-		{"ઐ", "Airavat (Elephant)", "🐘"},
-		{"ઓ", "Oshiku (Pillow)", "🛌"},
-		{"ઔ", "Aushadh (Medicine)", "💊"},
-	},
+var RegionalRegistry = map[string]LanguageProfile{
+	"Bihar":       {"Devanagari", "hi-IN", "ltr", []string{"अ", "आ", "इ", "ई", "उ", "ऊ", "ए", "ऐ", "ओ", "औ"}},
+	"Maharashtra": {"Devanagari", "mr-IN", "ltr", []string{"अ", "आ", "इ", "ई", "उ", "ऊ", "ए", "ऐ", "ओ", "औ"}},
+	"West Bengal": {"Bengali", "bn-IN", "ltr", []string{"অ", "আ", "ই", "ঈ", "উ", "ঊ", "এ", "ঐ", "ও", "ঔ"}},
+	"Punjab":      {"Gurmukhi", "pa-IN", "ltr", []string{"ੳ", "ਅ", "ੲ", "ਸ", "ਹ", "ਕ", "ਖ", "ਗ", "ਘ", "ਙ"}},
+	"Gujarat":     {"Gujarati", "gu-IN", "ltr", []string{"અ", "આ", "ઇ", "ઈ", "ઉ", "ઊ", "એ", "ઐ", "ઓ", "ઔ"}},
+	"Tamil Nadu":  {"Tamil", "ta-IN", "ltr", []string{"அ", "ஆ", "இ", "ஈ", "உ", "ஊ", "எ", "ஏ", "ஐ", "ஒ"}},
+	"Telangana":   {"Telugu", "te-IN", "ltr", []string{"అ", "ఆ", "ఇ", "ఈ", "ఉ", "ఊ", "ఎ", "ఏ", "ఐ", "ఒ"}},
+	"Karnataka":   {"Kannada", "kn-IN", "ltr", []string{"అ", "ఆ", "ఇ", "ఈ", "ఉ", "ఊ", "ఎ", "ఏ", "ఐ", "ఒ"}},
+	"Kerala":      {"Malayalam", "ml-IN", "ltr", []string{"അ", "ആ", "ഇ", "ഈ", "ഉ", "ഊ", "എ", "ഏ", "ഐ", "ഒ"}},
+	"Odisha":      {"Odia", "or-IN", "ltr", []string{"ଅ", "ଆ", "ଇ", "ଈ", "ଉ", "ଊ", "ଏ", "ଐ", "ଓ", "ঔ"}},
+	"Jharkhand":   {"Ol Chiki", "sat-IN", "ltr", []string{"ᱚ", "ᱛ", "ᱜ", "ᱝ", "ᱞ", "ᱟ", "ᱠ", "ᱡ", "ᱢ", "ᱣ"}},
 }
 
-// enableCORS is a helper function to allow frontend to talk to backend
-func enableCORS(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+func getAlphabet(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	state := r.URL.Query().Get("state")
+	profile, flux := RegionalRegistry[state]
+	if !flux {
+		profile = RegionalRegistry["Bihar"] // Default fallback
+	}
+	json.NewEncoder(w).Encode(profile)
 }
 
 func main() {
-	// Route 1: Setup User Profile & Language
-	http.HandleFunc("/setup", func(w http.ResponseWriter, r *http.Request) {
-		enableCORS(&w)
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		var profile map[string]interface{}
-		json.NewDecoder(r.Body).Decode(&profile)
-
-		name := "Kid"
-		state := "Bihar" // Defaults
-		if n, ok := profile["name"].(string); ok { name = n }
-		if s, ok := profile["state"].(string); ok { state = s }
-
-		language := "Hindi"
-		module := "Varnamala"
-
-		if state == "Punjab" {
-			language = "Punjabi"
-			module = "Gurmukhi"
-		} else if state == "Maharashtra" {
-			language = "Marathi"
-			module = "Mulakhshare"
-		} else if state == "Gujarat" {
-			language = "Gujarati"
-			module = "Kakko"
-		}
-
-		response := map[string]string{
-			"message":  "Welcome " + name + "!",
-			"language": language,
-			"module":   module,
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
-	})
-
-	// Route 2: Fetch Alphabet Data for the Game
-	http.HandleFunc("/get-alphabet", func(w http.ResponseWriter, r *http.Request) {
-		enableCORS(&w)
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
-
-		state := r.URL.Query().Get("state")
-		language := "Hindi" 
-		
-		if state == "Punjab" { language = "Punjabi" } else if state == "Maharashtra" { language = "Marathi" } else if state == "Gujarat" { language = "Gujarati" }
-
-		data := RegionalData[language]
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(data)
-	})
-
-	// Start the server
+	http.HandleFunc("/get-alphabet", getAlphabet)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Println("Server running on port:", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	http.ListenAndServe(":"+port, nil)
 }

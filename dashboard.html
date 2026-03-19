@@ -7,13 +7,12 @@
     <style>
         body {
             font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
-            background-color: #D6EAF8; /* Light blue background from your design */
+            background-color: #D6EAF8;
             margin: 0;
             padding: 20px;
             text-align: center;
         }
         
-        /* Top White Title Card */
         .header-card {
             background: white;
             padding: 20px;
@@ -27,17 +26,19 @@
         .header-card h1 {
             margin: 0;
             color: #2C3E50;
-            font-size: 2.5em;
-            letter-spacing: 2px;
+            font-size: 2.2em;
+            letter-spacing: 1px;
         }
         
         #loading-status {
-            font-size: 1.2em;
+            font-size: 1.1em;
             font-weight: bold;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            padding: 10px;
+            border-radius: 20px;
+            display: inline-block;
         }
 
-        /* Section Layouts */
         .section {
             max-width: 800px;
             margin: 0 auto 30px auto;
@@ -47,7 +48,7 @@
             color: white;
             padding: 15px;
             border-radius: 40px;
-            font-size: 1.5em;
+            font-size: 1.4em;
             font-weight: bold;
             margin-bottom: 15px;
             box-shadow: 0 4px 0 rgba(0,0,0,0.1);
@@ -60,18 +61,21 @@
         }
         .sub-btn {
             color: white;
-            padding: 15px;
+            padding: 18px;
             border-radius: 40px;
-            font-size: 1.2em;
+            font-size: 1.3em;
             font-weight: bold;
             cursor: pointer;
             border: none;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-            transition: transform 0.1s;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.1);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .sub-btn:active { transform: translateY(4px); box-shadow: 0 0 0; }
+        .sub-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-        /* Specific Colors matching your design */
         .bg-blue { background-color: #3498DB; }
         .bg-blue-light { background-color: #85C1E9; color: #2C3E50; }
         
@@ -81,91 +85,100 @@
         .bg-pink { background-color: #E84C3D; } 
         .bg-pink-light { background-color: #F1948A; color: white; }
 
-        /* Handle 4 buttons in regional */
-        .regional-grid {
-            grid-template-columns: 1fr 1fr;
-            display: grid;
-            gap: 15px;
-        }
         @media (max-width: 600px) {
-            .sub-grid, .regional-grid { grid-template-columns: 1fr; }
+            .sub-grid { grid-template-columns: 1fr; }
+            .header-card h1 { font-size: 1.8em; }
         }
     </style>
 </head>
 <body>
 
     <div class="header-card">
-        <h1 id="welcomeText">KIDS WORLD 🌈</h1>
+        <h1 id="welcomeText">LOADING...🌈</h1>
     </div>
     
     <div id="loading-status">☁️ Connecting to Cloud...</div>
 
+    <!-- ENGLISH SECTION -->
     <div class="section">
         <div class="main-bar bg-blue">ABC ALPHABETS</div>
         <div class="sub-grid">
-            <button class="sub-btn bg-blue-light" onclick="startGame('abc')">A - M</button>
-            <button class="sub-btn bg-blue-light" onclick="startGame('abc')">N - Z</button>
+            <button class="sub-btn bg-blue-light" onclick="startGame('abc_easy')">A - M 🍎</button>
+            <button class="sub-btn bg-blue-light" onclick="startGame('abc_hard')">N - Z 🦓</button>
         </div>
     </div>
 
+    <!-- NUMBERS SECTION -->
     <div class="section">
         <div class="main-bar bg-orange">123 NUMBERS</div>
         <div class="sub-grid">
-            <button class="sub-btn bg-orange-light" onclick="startGame('num')">1 - 10</button>
-            <button class="sub-btn bg-orange-light" onclick="startGame('num')">11 - 20</button>
+            <button class="sub-btn bg-orange-light" onclick="startGame('num_easy')">1 - 10 🔟</button>
+            <button class="sub-btn bg-orange-light" onclick="startGame('num_hard')">11 - 20 🔢</button>
         </div>
     </div>
 
+    <!-- REGIONAL SECTION (Dynamic) -->
     <div class="section">
-        <div class="main-bar bg-pink" id="regionalTitle">हिन्दी वर्णमाला</div>
-        <div class="regional-grid" id="regionalButtons">
-            <button class="sub-btn bg-pink-light" onclick="startGame('regional')">अ - अः</button>
-            <button class="sub-btn bg-pink-light" onclick="startGame('regional')">क - ञ</button>
-            <button class="sub-btn bg-pink-light" onclick="startGame('regional')">ट - न</button>
-            <button class="sub-btn bg-pink-light" onclick="startGame('regional')">प - ज्ञ</button>
+        <div class="main-bar bg-pink" id="regionalTitle">REGIONAL WORLD</div>
+        <div class="sub-grid" id="regionalButtons">
+            <button id="regBtn1" class="sub-btn bg-pink-light" onclick="startGame('reg_1')" disabled>Loading...</button>
+            <button id="regBtn2" class="sub-btn bg-pink-light" onclick="startGame('reg_2')" disabled>Loading...</button>
         </div>
     </div>
 
     <script>
-        // 1. Get User Info from LocalStorage
-        const kidName = localStorage.getItem('kidName') || "Kid";
+        // 1. Setup Identity
+        const kidName = localStorage.getItem('kidName') || "Explorer";
         const userState = localStorage.getItem('kidState') || "Bihar";
-        const savedLanguage = localStorage.getItem('kidLanguage') || "Regional Language";
-
-        // 2. Personalize the Dashboard UI
-        // Adds kid's name to the title!
         document.getElementById('welcomeText').innerText = kidName.toUpperCase() + "'S WORLD 🌈";
-        
-        // Dynamically set the Regional Title (e.g., "Gurmukhi" if Punjab, "Varnamala" if Bihar)
-        document.getElementById('regionalTitle').innerText = savedLanguage.toUpperCase();
 
-        // 3. THE MAGIC: Pre-fetch data from Cloud so the game starts instantly!
+        // 2. Pre-fetch 11-Script Data from Go Backend
         async function preFetchGameData() {
             try {
-                const response = await fetch(`https://kidworld.onrender.com/get-alphabet?state=${userState}`);
+                const response = await fetch(`https://your-backend-url.onrender.com/get-alphabet?state=${userState}`);
                 const gameData = await response.json();
                 
+                // Store globally for game.html
                 localStorage.setItem('cloudGameData', JSON.stringify(gameData));
                 
-                document.getElementById('loading-status').innerText = "✅ Cloud Data Ready!";
-                document.getElementById('loading-status').style.color = "#27AE60";
+                updateRegionalUI(gameData);
+                
+                document.getElementById('loading-status').innerText = "✅ Cloud Synced Successfully!";
+                document.getElementById('loading-status').style.backgroundColor = "#D4EFDF";
+                document.getElementById('loading-status').style.color = "#1D8348";
                 
             } catch (error) {
                 console.error("Cloud connection failed:", error);
-                document.getElementById('loading-status').innerText = "❌ Cloud Connection Failed.";
-                document.getElementById('loading-status').style.color = "#E84C3D";
+                document.getElementById('loading-status').innerText = "📡 Offline Mode / Server Busy";
+                document.getElementById('loading-status').style.backgroundColor = "#FADBD8";
+                document.getElementById('loading-status').style.color = "#943126";
             }
         }
 
-        preFetchGameData();
+        // 3. Update Regional UI based on Script
+        function updateRegionalUI(data) {
+            document.getElementById('regionalTitle').innerText = data.script.toUpperCase() + " WORLD";
+            
+            const btn1 = document.getElementById('regBtn1');
+            const btn2 = document.getElementById('regBtn2');
 
-        // 4. Navigate to Game
-        function startGame(selectedMode) {
-            // Note: Right now, all sub-buttons load the full array in game.html. 
-            // We can split the arrays (A-M vs N-Z) in game.html later if needed!
-            localStorage.setItem('gameMode', selectedMode);
+            // Set buttons to show actual Script characters from Backend!
+            // Example: For Hindi, show "अ - ऊ", for Punjabi "ੳ - ਸ"
+            const mid = Math.floor(data.alphabets.length / 2);
+            btn1.innerText = `${data.alphabets[0]} - ${data.alphabets[mid-1]}`;
+            btn2.innerText = `${data.alphabets[mid]} - ${data.alphabets[data.alphabets.length-1]}`;
+
+            btn1.disabled = false;
+            btn2.disabled = false;
+        }
+
+        function startGame(mode) {
+            localStorage.setItem('selectedMode', mode);
             window.location.href = "game.html"; 
         }
+
+        // Run on load
+        preFetchGameData();
     </script>
 </body>
 </html>

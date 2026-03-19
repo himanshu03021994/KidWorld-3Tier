@@ -11,7 +11,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-image: radial-gradient(circle, #fff 10%, transparent 11%), radial-gradient(circle, #fff 10%, transparent 11%);
             background-size: 60px 60px;
@@ -19,27 +19,41 @@
         }
         .login-card {
             background-color: white;
-            padding: 40px;
+            padding: 30px;
             border-radius: 25px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
             text-align: center;
-            max-width: 400px;
+            max-width: 420px;
             width: 90%;
             border: 5px solid #FFB6C1;
+            margin: 20px 0;
         }
-        h1 { color: #FF6347; margin-top: 0; }
+        h1 { color: #FF6347; margin-bottom: 20px; font-size: 2.2em; }
         .input-group { margin-bottom: 15px; text-align: left; }
         label { color: #32CD32; font-weight: bold; display: block; margin-bottom: 5px;}
         input, select { 
-            width: 100%; padding: 10px; border: 3px solid #FFD700; 
-            border-radius: 10px; box-sizing: border-box; font-size: 1em;
+            width: 100%; padding: 12px; border: 3px solid #FFD700; 
+            border-radius: 12px; box-sizing: border-box; font-size: 1em;
+            outline: none;
         }
         .play-btn {
             background-color: #32CD32; color: white; border: none; padding: 15px;
             font-size: 1.5em; border-radius: 20px; cursor: pointer; width: 100%;
             font-weight: bold; box-shadow: 0 5px 0 #228B22; margin-top: 10px;
+            transition: 0.2s;
         }
-        .play-btn:active { transform: translateY(5px); box-shadow: 0 0 0 #228B22; }
+        .play-btn:hover { background-color: #3CB371; }
+        .play-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #228B22; }
+
+        .skip-link {
+            display: inline-block;
+            margin-top: 15px;
+            color: #4682B4;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
         #resultArea { display: none; margin-top: 20px; padding: 20px; background: #e0f7fa; border-radius: 15px; }
     </style>
 </head>
@@ -51,78 +65,71 @@
         <form id="kidForm">
             <div class="input-group">
                 <label>Kid's Name:</label>
-                <input type="text" id="kidName" required>
+                <input type="text" id="kidName" placeholder="Enter Name" required>
             </div>
+            
             <div class="input-group">
-                <label>Age:</label>
-                <select id="kidAge" required>
-                    <option value="2">2</option>
-                    <option value="3" selected>3</option>
-                    <option value="4">4</option>
-                    <option value="5">5+</option>
-                </select>
-            </div>
-            <div class="input-group">
-                <label>Mobile Number:</label>
-                <input type="text" id="mobile" required>
-            </div>
-            <div class="input-group">
-                <label>Town:</label>
-                <input type="text" id="town" placeholder="e.g., Patna" required>
-            </div>
-            <div class="input-group">
-                <label>State:</label>
+                <label>Select Your State:</label>
                 <select id="state" required>
-                    <option value="Bihar">Bihar</option>
-                    <option value="Maharashtra">Maharashtra</option>
-                    <option value="Gujarat">Gujarat</option>
-                    <option value="Delhi">Delhi</option>
+                    <option value="Bihar">Bihar (Hindi)</option>
+                    <option value="Maharashtra">Maharashtra (Marathi)</option>
+                    <option value="Punjab">Punjab (Punjabi)</option>
+                    <option value="Gujarat">Gujarat (Gujarati)</option>
+                    <option value="West Bengal">West Bengal (Bengali)</option>
+                    <option value="Tamil Nadu">Tamil Nadu (Tamil)</option>
+                    <option value="Telangana">Telangana (Telugu/Urdu)</option>
+                    <option value="Karnataka">Karnataka (Kannada)</option>
+                    <option value="Kerala">Kerala (Malayalam)</option>
+                    <option value="Odisha">Odisha (Odia)</option>
+                    <option value="Jharkhand">Jharkhand (Santali)</option>
+                    <option value="Delhi">Delhi (Hindi)</option>
                 </select>
             </div>
+
             <button type="submit" class="play-btn">Let's Play! 🚀</button>
+            
+            <!-- SKIP OPTION FOR GUEST MODE -->
+            <div class="skip-link" onclick="skipAndPlay()">Skip & Play as Guest 🏃‍♂️</div>
         </form>
 
         <div id="resultArea">
             <h2 id="welcomeMessage" style="color: #FF6347;"></h2>
-            <p style="font-size: 1.2em;">Loading <strong id="languageText"></strong>...</p>
+            <p style="font-size: 1.2em;">Setting up your <strong id="languageText"></strong> World...</p>
             <h3 id="moduleText" style="color: #32CD32;"></h3>
         </div>
     </div>
 
     <script>
+        // FORM SUBMISSION LOGIC
         document.getElementById('kidForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Stops the page from refreshing
+            event.preventDefault();
+            const kidName = document.getElementById('kidName').value;
+            const state = document.getElementById('state').value;
+            saveAndRedirect(kidName, state);
+        });
 
-    // 1. Get user inputs
-    const kidName = document.getElementById('kidName').value;
-    const state = document.getElementById('state').value;
+        // SKIP / GUEST LOGIC
+        function skipAndPlay() {
+            saveAndRedirect("Guest Explorer", "Bihar"); // Default to Bihar/Hindi
+        }
 
-    // 2. Decide Language logically based on State
-    let language = "Hindi";
-    let moduleText = "Varnamala";
-    
-    if(state === "Punjab") { language = "Punjabi"; moduleText = "Gurmukhi"; }
-    else if(state === "Maharashtra") { language = "Marathi"; moduleText = "Mulakhshare"; }
-    else if(state === "Gujarat") { language = "Gujarati"; moduleText = "Kakko"; }
+        // REUSABLE REDIRECT FUNCTION
+        function saveAndRedirect(name, state) {
+            // Save to LocalStorage
+            localStorage.setItem('kidName', name);
+            localStorage.setItem('kidState', state);
 
-    // 3. Show Loading Screen
-    document.getElementById('kidForm').style.display = 'none';
-    document.getElementById('resultArea').style.display = 'block';
-    
-    document.getElementById('welcomeMessage').innerText = "Welcome " + kidName + "!";
-    document.getElementById('languageText').innerText = language;
-    document.getElementById('moduleText').innerText = moduleText;
+            // UI Feedback
+            document.getElementById('kidForm').style.display = 'none';
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('welcomeMessage').innerText = "Namaste, " + name + "!";
+            document.getElementById('languageText').innerText = state;
 
-    // 4. Save data for the Dashboard (Crucial Step!)
-    localStorage.setItem('kidName', kidName);
-    localStorage.setItem('kidState', state);
-    localStorage.setItem('kidLanguage', language);
-
-    // 5. Teleport to Dashboard after 3 seconds
-    setTimeout(() => {
-        window.location.href = "dashboard.html";
-    }, 3000);
-});
+            // Teleport to Dashboard
+            setTimeout(() => {
+                window.location.href = "dashboard.html";
+            }, 2000);
+        }
     </script>
 </body>
 </html>
