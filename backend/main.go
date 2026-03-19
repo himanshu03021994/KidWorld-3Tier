@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 )
@@ -22,26 +24,51 @@ var RegionalRegistry = map[string]LanguageProfile{
 	"Tamil Nadu":  {"Tamil", "ta-IN", "ltr", []string{"அ", "ஆ", "இ", "ஈ", "உ", "ஊ", "எ", "ஏ", "ஐ", "ஒ"}},
 	"Telangana":   {"Telugu", "te-IN", "ltr", []string{"అ", "ఆ", "ఇ", "ఈ", "ఉ", "ఊ", "ఎ", "ఏ", "ఐ", "ఒ"}},
 	"Karnataka":   {"Kannada", "kn-IN", "ltr", []string{"అ", "ఆ", "ఇ", "ఈ", "ఉ", "ఊ", "ఎ", "ఏ", "ఐ", "ఒ"}},
-	"Kerala":      {"Malayalam", "ml-IN", "ltr", []string{"അ", "ആ", "ഇ", "ഈ", "ഉ", "ഊ", "എ", "ഏ", "ഐ", "ഒ"}},
+	"Kerala":      {"Malayalam", "ml-IN", "ltr", []string{"അ", "ആ", "ഇ", "ഈ", "ഉ", "ഊ", "എ", "ஏ", "ഐ", "ഒ"}},
 	"Odisha":      {"Odia", "or-IN", "ltr", []string{"ଅ", "ଆ", "ଇ", "ଈ", "ଉ", "ଊ", "ଏ", "ଐ", "ଓ", "ঔ"}},
 	"Jharkhand":   {"Ol Chiki", "sat-IN", "ltr", []string{"ᱚ", "ᱛ", "ᱜ", "ᱝ", "ᱞ", "ᱟ", "ᱠ", "ᱡ", "ᱢ", "ᱣ"}},
+	"Delhi":       {"Devanagari", "hi-IN", "ltr", []string{"अ", "आ", "इ", "ई", "उ", "ऊ", "ए", "ऐ", "ओ", "औ"}},
 }
 
 func getAlphabet(w http.ResponseWriter, r *http.Request) {
+	// 1. Mandatory CORS Headers for Render/GitHub Pages
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+
+	// 2. Handle Preflight OPTIONS request
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	state := r.URL.Query().Get("state")
-	profile, flux := RegionalRegistry[state]
-	if !flux {
+	log.Printf("Request received for state: %s", state)
+
+	profile, exists := RegionalRegistry[state]
+	if !exists {
 		profile = RegionalRegistry["Bihar"] // Default fallback
 	}
+
 	json.NewEncoder(w).Encode(profile)
 }
 
 func main() {
 	http.HandleFunc("/get-alphabet", getAlphabet)
+
+	// Health check for Render
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "KidWorld Backend is Running!")
+	})
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	http.ListenAndServe(":"+port, nil)
+
+	log.Printf("Server starting on port %s...", port)
+	if err := http.ListenAndServe(":"+port, nil); err != nil {
+		log.Fatal(err)
+	}
 }

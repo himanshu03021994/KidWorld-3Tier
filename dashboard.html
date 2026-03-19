@@ -131,11 +131,9 @@
 
         async function preFetchGameData() {
             const statusLabel = document.getElementById('loading-status');
+            const apiUrl = `https://kidworld.onrender.com/get-alphabet?state=${encodeURIComponent(userState)}`;
             
             try {
-                // Fixed URL to match your Live Render Service
-                const apiUrl = `https://kidworld.onrender.com/get-alphabet?state=${encodeURIComponent(userState)}`;
-                
                 const response = await fetch(apiUrl, {
                     method: 'GET',
                     headers: { 'Accept': 'application/json' }
@@ -158,7 +156,7 @@
                 statusLabel.style.backgroundColor = "#FADBD8";
                 statusLabel.style.color = "#943126";
                 
-                // Retry after 5 seconds if it's a cold start
+                // Retry logic for Render cold start
                 setTimeout(preFetchGameData, 5000);
             }
         }
