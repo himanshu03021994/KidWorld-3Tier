@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kid World - Playing...</title>
+    <title>Kid World - Learning Mode</title>
     <style>
         body {
             font-family: 'Arial Unicode MS', 'Comic Sans MS', sans-serif;
@@ -11,7 +11,6 @@
             text-align: center;
             margin: 0;
             padding: 20px;
-            transition: direction 0.5s ease; /* Smooth flip for RTL */
         }
         .game-container {
             max-width: 600px;
@@ -26,17 +25,18 @@
             justify-content: space-between;
             font-size: 1.5em;
             margin-bottom: 20px;
-            padding: 10px;
+            padding: 10px 20px;
             background: #fef9e7;
-            border-radius: 15px;
+            border-radius: 20px;
         }
         .target-box {
-            font-size: 5em;
+            font-size: 6em;
             background: #EBEDEF;
-            padding: 20px;
-            border-radius: 20px;
+            padding: 30px;
+            border-radius: 25px;
             margin-bottom: 20px;
             color: #2C3E50;
+            border: 4px dashed #BDC3C7;
         }
         .grid {
             display: grid;
@@ -47,110 +47,104 @@
             font-size: 2.5em;
             padding: 20px;
             border: none;
-            border-radius: 15px;
+            border-radius: 20px;
             background: #3498DB;
             color: white;
             cursor: pointer;
-            box-shadow: 0 5px 0 #2980B9;
+            box-shadow: 0 6px 0 #2980B9;
             transition: 0.1s;
         }
-        .btn-option:active { transform: translateY(4px); box-shadow: 0 1px 0 #2980B9; }
+        .btn-option:active { transform: translateY(4px); box-shadow: 0 2px 0 #2980B9; }
         
-        /* Urdu/RTL Logic */
-        .rtl-mode { direction: rtl; text-align: right; }
+        /* Special class for Urdu/RTL */
+        .rtl-layout { direction: rtl; }
     </style>
 </head>
 <body>
 
-<div class="game-container" id="mainContainer">
+<div class="game-container" id="gameArea">
     <div class="stats-bar">
-        <span>🪙 <span id="coins">0</span></span>
-        <span>❤️❤️❤️</span>
+        <span>🪙 <span id="coinCount">0</span></span>
+        <button onclick="window.location.href='dashboard.html'" style="border:none; background:none; cursor:pointer; font-size:1em;">🏠 Back</button>
     </div>
 
-    <div class="target-box" id="targetLetter">?</div>
-    <h2 id="instruction">Find the letter!</h2>
+    <div class="target-box" id="targetDisplay">?</div>
+    <h2 id="msgLabel" style="color: #7F8C8D;">Listen and Find!</h2>
 
-    <div class="grid" id="optionsGrid">
-        </div>
+    <div class="grid" id="optionsGrid"></div>
 </div>
 
 <script>
-    let currentData = null;
-    let target = "";
-    let coins = 0;
+    let gameData = null;
+    let targetLetter = "";
+    let totalCoins = parseInt(localStorage.getItem('savedCoins')) || 0;
 
-    // 1. Initialize Game with 11-Script Support
-    function initGame() {
-        const rawData = localStorage.getItem('cloudGameData');
-        if (!rawData) {
-            alert("No data found! Please go back to Dashboard.");
+    function init() {
+        const raw = localStorage.getItem('cloudGameData');
+        if (!raw) {
+            window.location.href = "dashboard.html";
             return;
         }
-        currentData = JSON.parse(rawData);
+        gameData = JSON.parse(raw);
+        document.getElementById('coinCount').innerText = totalCoins;
 
-        // RTL Support Check (Urdu Logic)
-        if (currentData.direction === "rtl") {
-            document.body.classList.add('rtl-mode');
-            document.getElementById('mainContainer').classList.add('rtl-mode');
+        // Apply RTL if Urdu
+        if(gameData.direction === "rtl") {
+            document.getElementById('gameArea').classList.add('rtl-layout');
         }
 
-        generateRound();
+        nextRound();
     }
 
-    // 2. Generate Round (6 Button Logic)
-    function generateRound() {
-        const alphabets = currentData.alphabets;
-        target = alphabets[Math.floor(Math.random() * alphabets.length)];
-        document.getElementById('targetLetter').innerText = target;
+    function nextRound() {
+        const chars = gameData.alphabets;
+        targetLetter = chars[Math.floor(Math.random() * chars.length)];
+        document.getElementById('targetDisplay').innerText = targetLetter;
 
-        // Shuffle and pick 5 wrong ones
-        let options = [target];
-        while (options.length < 6) {
-            let randomChar = alphabets[Math.floor(Math.random() * alphabets.length)];
-            if (!options.includes(randomChar)) options.push(randomChar);
+        // Shuffle options
+        let options = [targetLetter];
+        while(options.length < 6) {
+            let r = chars[Math.floor(Math.random() * chars.length)];
+            if(!options.includes(r)) options.push(r);
         }
         options.sort(() => Math.random() - 0.5);
 
-        // Render Buttons
         const grid = document.getElementById('optionsGrid');
         grid.innerHTML = "";
-        options.forEach(char => {
-            const btn = document.createElement('button');
-            btn.className = "btn-option";
-            btn.innerText = char;
-            btn.onclick = () => checkAnswer(char, btn);
-            grid.appendChild(btn);
+        options.forEach(c => {
+            const b = document.createElement('button');
+            b.className = "btn-option";
+            b.innerText = c;
+            b.onclick = () => check(c, b);
+            grid.appendChild(b);
         });
 
-        // Voice Engine Call
-        speak(`Find ${target}`);
+        announce(`Find ${targetLetter}`);
     }
 
-    // 3. AI Voice Engine (Regional Accent Support)
-    function speak(text) {
-        const msg = new SpeechSynthesisUtterance(text);
-        msg.lang = currentData.langCode; // e.g., 'hi-IN', 'pa-IN', 'ur-IN'
-        msg.rate = 0.9; // Slightly slower for kids
-        window.speechSynthesis.speak(msg);
+    function announce(txt) {
+        const utterance = new SpeechSynthesisUtterance(txt);
+        utterance.lang = gameData.langCode;
+        utterance.rate = 0.8;
+        window.speechSynthesis.speak(utterance);
     }
 
-    // 4. Check Answer
-    function checkAnswer(selected, btn) {
-        if (selected === target) {
-            coins += 10;
-            document.getElementById('coins').innerText = coins;
+    function check(val, btn) {
+        if(val === targetLetter) {
+            totalCoins += 10;
+            localStorage.setItem('savedCoins', totalCoins); // Permanent Save!
+            document.getElementById('coinCount').innerText = totalCoins;
             btn.style.backgroundColor = "#27AE60";
-            speak("Correct!");
-            setTimeout(generateRound, 1000);
+            announce("Wah! Correct.");
+            setTimeout(nextRound, 1000);
         } else {
             btn.style.backgroundColor = "#E74C3C";
-            speak("Try again!");
+            announce("Try again.");
+            setTimeout(() => btn.style.backgroundColor = "#3498DB", 500);
         }
     }
 
-    window.onload = initGame;
+    window.onload = init;
 </script>
-
 </body>
 </html>
