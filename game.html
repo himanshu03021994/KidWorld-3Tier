@@ -55,8 +55,6 @@
             transition: 0.1s;
         }
         .btn-option:active { transform: translateY(4px); box-shadow: 0 2px 0 #2980B9; }
-        
-        /* Special class for Urdu/RTL */
         .rtl-layout { direction: rtl; }
     </style>
 </head>
@@ -65,32 +63,56 @@
 <div class="game-container" id="gameArea">
     <div class="stats-bar">
         <span>🪙 <span id="coinCount">0</span></span>
-        <button onclick="window.location.href='dashboard.html'" style="border:none; background:none; cursor:pointer; font-size:1em;">🏠 Back</button>
+        <button onclick="window.location.href='dashboard.html'" style="border:none; background:none; cursor:pointer; font-size:1em;">🏠 Home</button>
     </div>
 
     <div class="target-box" id="targetDisplay">?</div>
-    <h2 id="msgLabel" style="color: #7F8C8D;">Listen and Find!</h2>
+    <h2 id="msgLabel" style="color: #7F8C8D;">Listen carefully!</h2>
 
     <div class="grid" id="optionsGrid"></div>
 </div>
 
 <script>
+    // 1. DATASETS FOR ENGLISH & MATHS
+    const localDatasets = {
+        'abc_easy': { 
+            alphabets: ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M"], 
+            langCode: "en-US", 
+            words: {"A":"Apple","B":"Ball","C":"Cat","D":"Dog","E":"Elephant","F":"Fish","G":"Goat","H":"Hat","I":"Igloo","J":"Jug","K":"Kite","L":"Lion","M":"Monkey"}
+        },
+        'abc_hard': { 
+            alphabets: ["N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"], 
+            langCode: "en-US", 
+            words: {"N":"Net","O":"Orange","P":"Parrot","Q":"Queen","R":"Rabbit","S":"Sun","T":"Tiger","U":"Umbrella","V":"Van","W":"Watch","X":"Xylophone","Y":"Yo-yo","Z":"Zebra"}
+        },
+        'num_easy': { 
+            alphabets: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], 
+            langCode: "en-US", 
+            words: {"1":"One","2":"Two","3":"Three","4":"Four","5":"Five","6":"Six","7":"Seven","8":"Eight","9":"Nine","10":"Ten"}
+        },
+        'num_hard': { 
+            alphabets: ["11", "12", "13", "14", "15", "16", "17", "18", "19", "20"], 
+            langCode: "en-US", 
+            words: {"11":"Eleven","12":"Twelve","13":"Thirteen","14":"Fourteen","15":"Fifteen","16":"Sixteen","17":"Seventeen","18":"Eighteen","19":"Nineteen","20":"Twenty"}
+        }
+    };
+
     let gameData = null;
     let targetLetter = "";
     let totalCoins = parseInt(localStorage.getItem('savedCoins')) || 0;
+    let selectedMode = localStorage.getItem('selectedMode') || 'abc_easy';
 
     function init() {
-        const raw = localStorage.getItem('cloudGameData');
-        if (!raw) {
-            window.location.href = "dashboard.html";
-            return;
-        }
-        gameData = JSON.parse(raw);
         document.getElementById('coinCount').innerText = totalCoins;
 
-        // Apply RTL if Urdu
-        if(gameData.direction === "rtl") {
-            document.getElementById('gameArea').classList.add('rtl-layout');
+        // 2. LOGIC: Decide if we use Cloud Data (Regional) or Local Data (English/Math)
+        if (selectedMode.startsWith('reg_')) {
+            const raw = localStorage.getItem('cloudGameData');
+            if (!raw) { window.location.href = "dashboard.html"; return; }
+            gameData = JSON.parse(raw);
+            if(gameData.direction === "rtl") document.getElementById('gameArea').classList.add('rtl-layout');
+        } else {
+            gameData = localDatasets[selectedMode] || localDatasets['abc_easy'];
         }
 
         nextRound();
@@ -101,7 +123,6 @@
         targetLetter = chars[Math.floor(Math.random() * chars.length)];
         document.getElementById('targetDisplay').innerText = targetLetter;
 
-        // Shuffle options
         let options = [targetLetter];
         while(options.length < 6) {
             let r = chars[Math.floor(Math.random() * chars.length)];
@@ -119,28 +140,35 @@
             grid.appendChild(b);
         });
 
-        announce(`Find ${targetLetter}`);
+        announce(`Find the letter ${targetLetter}`);
     }
 
     function announce(txt) {
         const utterance = new SpeechSynthesisUtterance(txt);
         utterance.lang = gameData.langCode;
-        utterance.rate = 0.8;
+        utterance.rate = 0.85;
         window.speechSynthesis.speak(utterance);
     }
 
     function check(val, btn) {
         if(val === targetLetter) {
             totalCoins += 10;
-            localStorage.setItem('savedCoins', totalCoins); // Permanent Save!
+            localStorage.setItem('savedCoins', totalCoins);
             document.getElementById('coinCount').innerText = totalCoins;
             btn.style.backgroundColor = "#27AE60";
-            announce("Wah! Correct.");
-            setTimeout(nextRound, 1000);
+            
+            // Educational Feedback: e.g., "A for Apple"
+            let feedback = "That's right!";
+            if(gameData.words && gameData.words[val]) {
+                feedback = `${val} for ${gameData.words[val]}`;
+            }
+            
+            announce(feedback);
+            setTimeout(nextRound, 2000);
         } else {
             btn.style.backgroundColor = "#E74C3C";
-            announce("Try again.");
-            setTimeout(() => btn.style.backgroundColor = "#3498DB", 500);
+            announce("Oops! Try again.");
+            setTimeout(() => btn.style.backgroundColor = "#3498DB", 600);
         }
     }
 

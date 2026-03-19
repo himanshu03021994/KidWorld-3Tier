@@ -178,9 +178,19 @@
         }
 
         function startGame(mode) {
-            localStorage.setItem('selectedMode', mode);
-            window.location.href = "game.html"; 
-        }
+    // 1. Save the specific mode (abc_easy, reg_1, etc.)
+    localStorage.setItem('selectedMode', mode);
+
+    // 2. Decide if it's English, Numbers, or Regional
+    let type = "regional";
+    if (mode.startsWith('abc')) type = "english";
+    if (mode.startsWith('num')) type = "maths";
+    
+    localStorage.setItem('gameType', type);
+
+    // 3. Go to game!
+    window.location.href = "game.html"; 
+}
 
         window.onload = preFetchGameData;
     </script>
